@@ -1,23 +1,28 @@
 volumes:
   pg-data:
 
+
 services:
-  user:
+  authn:
     build: ./authn
     ports:
       - "5000:5000"
     volumes:
       - ./authn:/app
+    environment:
+      DATABASE_URL: postgres://chirper:chirper@authn-db:5432/chirper
     depends_on:
-      - db
-  
-  db:
-    image: postgres:16.4
+      - authn-db
+
+  authn-db:
+    image: postgres:17.2
     restart: unless-stopped
     volumes:
+      - ./authn/scripts/db:/docker-entrypoint-initdb.d
       - pg-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     environment:
-        - POSTGRES_USER: chirper
-        - POSTGRES_PASSWORD: chirper
+      POSTGRES_USER: chirper
+      POSTGRES_PASSWORD: chirper
+      POSTGRES_DB: chirper

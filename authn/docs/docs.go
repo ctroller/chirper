@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/login": {
+        "/api/v1/login": {
             "post": {
                 "description": "login",
                 "consumes": [
@@ -32,9 +32,22 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/login.LoginResponse"
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "login.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
                 }
             }
         }

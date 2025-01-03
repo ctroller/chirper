@@ -1,9 +1,12 @@
 package login
 
 import (
+	"context"
 	"encoding/json"
-	"log/slog"
 	"net/http"
+
+	"github.com/ctroller/chirper/authn/internal/inject"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type LoginRequest struct {
@@ -32,7 +35,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Implement login logic here
 	token, err := authenticateUser(req.Username, req.Password)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -49,5 +51,16 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func authenticateUser(username, password string) (string, error) {
+	var passwordHash string
+	err := inject.App.DBPool.QueryRow(context.Background(), "SELECT password_hash FROM users WHERE username=$1", username).Scan(&passwordHash)
+	if err != nil {
+		return "", err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(password))
+	if err != nil {
+		return "", err
+	}
+
 	return "dummy-token", nil
 }

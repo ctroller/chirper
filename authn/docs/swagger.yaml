@@ -1,7 +1,15 @@
+definitions:
+  login.LoginResponse:
+    properties:
+      status:
+        type: string
+      token:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
-  /login:
+  /api/v1/login:
     post:
       consumes:
       - application/json
@@ -12,7 +20,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: string
+            $ref: '#/definitions/login.LoginResponse'
       summary: Login
       tags:
       - login
