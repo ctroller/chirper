@@ -1,0 +1,21 @@
+volumes:
+  pg-data:
+
+services:
+  main:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ../..:/workspaces:cached
+    command: sleep infinity
+    network_mode: service:db
+
+  db:
+    image: postgres:16.4
+    restart: unless-stopped
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: chirper
+      POSTGRES_PASSWORD: chirper

@@ -1,0 +1,20 @@
+{
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "main",
+    "name": "Chirper",
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+    "containerUser": "vscode",
+    "remoteUser": "vscode",
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "golang.Go",
+          "ms-azuretools.vscode-docker",
+          "esbenp.prettier-vscode",
+          "GitHub.copilot",
+          "github.vscode-github-actions",
+          "ms-vscode.makefile-tools"
+        ]
+      }
+    }
+  }
