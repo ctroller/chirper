@@ -29,7 +29,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var req LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
-		slog.Error("Invalid request payload", slog.Any("error", err))
 		return
 	}
 
