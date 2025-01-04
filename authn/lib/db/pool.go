@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	pgxslog "github.com/timtoronto634/pgx-slog"
+	"github.com/timtoronto634/pgx-slog"
 )
 
 type Postgres struct {
