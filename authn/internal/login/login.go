@@ -3,6 +3,7 @@ package login
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -39,8 +40,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	token, err := authenticateUser(req.Username, req.Password)
 	if err != nil {
+		slog.Debug("Authentication failed", "error", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		slog.Debug("Unauthorized", "error", err)
 		return
 	}
 
@@ -56,11 +57,32 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 var JWT_KEY = []byte("dummy-key") // TODO: change this to a secure key
 
 func authenticateUser(username, password string) (string, error) {
+
+	rows, err := inject.App.DBPool.Query(context.Background(), `
+		SHOW ALL;
+	`)
+	if err != nil {
+		slog.Error("Unable to connect to DB", "error", err)
+	} else {
+		for rows.Next() {
+			var schemaName, tableName, unused string
+			err = rows.Scan(&schemaName, &tableName, &unused)
+			if err != nil {
+				slog.Error("Unable to connect to DB", "error", err)
+			} else {
+				slog.Info("dump:", "tableName", tableName, "schemaName", schemaName)
+			}
+		}
+	}
+
 	var passwordHash string
 	var userId int
-	err := inject.App.DBPool.QueryRow(context.Background(), "SELECT id, password_hash FROM user WHERE username=$1", username).Scan(&userId, &passwordHash)
+	err = inject.App.DBPool.QueryRow(context.Background(), "SELECT id, password_hash FROM users WHERE username=$1", username).Scan(&userId, &passwordHash)
+
 	if err != nil {
 		return "", err
+	} else if userId == 0 {
+		return "", fmt.Errorf("user not found")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(password))

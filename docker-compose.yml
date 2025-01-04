@@ -10,7 +10,7 @@ services:
     volumes:
       - ./authn:/app
     environment:
-      DATABASE_URL: postgres://chirper:chirper@authn-db:5432/chirper
+      DATABASE_URL: postgres://chirper:ch@ngem3$@authn-db:5432/chirper
     depends_on:
       - authn-db
 
@@ -24,5 +24,4 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_USER: chirper
-      POSTGRES_PASSWORD: chirper
-      POSTGRES_DB: chirper
+      POSTGRES_PASSWORD: ch@ngem3$

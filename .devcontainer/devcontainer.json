@@ -20,4 +20,5 @@
     "features": {
       "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
     },
+    "runArgs": ["--add-host=host.docker.internal:host-gateway"]
   }
