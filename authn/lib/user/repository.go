@@ -16,7 +16,7 @@ type UserRepositoryImpl struct {
 }
 
 func (r *UserRepositoryImpl) Find(name string) (*User, error) {
-	var userId int
+	var userId int64
 	var username, passwordHash string
 
 	err := r.DB.QueryRow(context.Background(), "SELECT id, username, password_hash FROM users WHERE username=$1", name).Scan(&userId, &username, &passwordHash)

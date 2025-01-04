@@ -75,8 +75,14 @@ func main() {
 	setupApp()
 	r := setupRouter()
 
-	slog.Info("Authentication service is running on port 5000")
-	err := http.ListenAndServe(":5000", r)
+	listenAddr := os.Getenv("LISTEN_ADDR")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "5000"
+	}
+
+	slog.Info("Authentication service is running", "port", port, "listenAddr", listenAddr)
+	err := http.ListenAndServe(listenAddr+":"+port, r)
 	if err != nil {
 		slog.Error("Failed to start authentication service", "error", err)
 	}

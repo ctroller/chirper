@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/ctroller/chirper/authn/internal/inject"
 	"github.com/golang-jwt/jwt/v5"
@@ -67,7 +68,7 @@ func authenticateUser(username, password string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iss": "chirper",
-		"sub": user.ID,
+		"sub": strconv.FormatInt(user.ID, 10),
 	})
 	return token.SignedString(JWT_KEY)
 }
