@@ -3,9 +3,11 @@ package login
 import (
 	"context"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	"github.com/ctroller/chirper/authn/internal/inject"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -38,6 +40,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	token, err := authenticateUser(req.Username, req.Password)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		slog.Debug("Unauthorized", "error", err)
 		return
 	}
 
@@ -50,9 +53,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+var JWT_KEY = []byte("dummy-key") // TODO: change this to a secure key
+
 func authenticateUser(username, password string) (string, error) {
 	var passwordHash string
-	err := inject.App.DBPool.QueryRow(context.Background(), "SELECT password_hash FROM users WHERE username=$1", username).Scan(&passwordHash)
+	var userId int
+	err := inject.App.DBPool.QueryRow(context.Background(), "SELECT id, password_hash FROM user WHERE username=$1", username).Scan(&userId, &passwordHash)
 	if err != nil {
 		return "", err
 	}
@@ -62,5 +68,9 @@ func authenticateUser(username, password string) (string, error) {
 		return "", err
 	}
 
-	return "dummy-token", nil
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"iss": "chirper",
+		"sub": userId,
+	})
+	return token.SignedString(JWT_KEY)
 }

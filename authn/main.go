@@ -7,11 +7,11 @@ import (
 	"os"
 	"time"
 
+	"github.com/ctroller/chirper/authn/internal/db"
 	"github.com/ctroller/chirper/authn/internal/inject"
 	"github.com/ctroller/chirper/authn/internal/login"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/jackc/pgx/v5/pgxpool"
 
 	httpSwagger "github.com/swaggo/http-swagger"
 
@@ -38,30 +38,38 @@ func setupRouter() *chi.Mux {
 }
 
 func setupLogging() {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	slog.SetDefault(logger)
 }
 
-func setupDB() *pgxpool.Pool {
-	dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
+func setupDB() *db.Postgres {
+	postgres, err := db.NewPG(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
-		slog.Error("Unable to create connection pool", "error", err)
+		slog.Error("Unable to create DB connection", "error", err)
 		os.Exit(1)
 	}
-	defer dbpool.Close()
 
-	return dbpool
+	var dbName string
+	err = postgres.DB.QueryRow(context.Background(), "SELECT current_database();").Scan(&dbName)
+	if err != nil {
+		slog.Error("Unable to connect to DB", "error", err)
+		os.Exit(1)
+	} else {
+		slog.Info("Connected to DB", "database", dbName)
+	}
+
+	return postgres
 }
 
 func setupApp() {
 	inject.App = inject.Application{
-		DBPool: setupDB(),
+		DBPool: setupDB().DB,
 	}
 }
 
 func main() {
-	setupApp()
 	setupLogging()
+	setupApp()
 	r := setupRouter()
 
 	slog.Info("Authentication service is running on port 5000")

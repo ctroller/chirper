@@ -18,8 +18,8 @@ services:
     image: postgres:17.2
     restart: unless-stopped
     volumes:
-      - ./authn/scripts/db:/docker-entrypoint-initdb.d
       - pg-data:/var/lib/postgresql/data
+      - ./authn/scripts/db/:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     environment:
