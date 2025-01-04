@@ -7,9 +7,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/ctroller/chirper/authn/internal/db"
 	"github.com/ctroller/chirper/authn/internal/inject"
 	"github.com/ctroller/chirper/authn/internal/login"
+	"github.com/ctroller/chirper/authn/lib/db"
+	"github.com/ctroller/chirper/authn/lib/user"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
@@ -17,9 +18,6 @@ import (
 
 	_ "github.com/ctroller/chirper/authn/docs"
 )
-
-// gin-swagger middleware
-// swagger embed files
 
 func setupRouter() *chi.Mux {
 	r := chi.NewRouter()
@@ -62,8 +60,13 @@ func setupDB() *db.Postgres {
 }
 
 func setupApp() {
+	db := setupDB()
+
 	inject.App = inject.Application{
-		DBPool: setupDB().DB,
+		DBPool: db.DB,
+		UserRepository: &user.UserRepositoryImpl{
+			DB: db.DB,
+		},
 	}
 }
 
@@ -75,6 +78,6 @@ func main() {
 	slog.Info("Authentication service is running on port 5000")
 	err := http.ListenAndServe(":5000", r)
 	if err != nil {
-		slog.Error("Failed to start authentication service", err)
+		slog.Error("Failed to start authentication service", "error", err)
 	}
 }

@@ -1,14 +1,13 @@
 package inject
 
 import (
-	"log/slog"
-
+	"github.com/ctroller/chirper/authn/lib/user"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Application struct {
-	DBPool *pgxpool.Pool
-	Logger *slog.Logger
+	DBPool         *pgxpool.Pool
+	UserRepository user.UserRepository
 }
 
 var App Application
